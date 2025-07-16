@@ -9,10 +9,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$dsn = "host=db.uyqspojnegjmxnedbtph.supabase.co port=5432 dbname=postgres user=postgres password=09123433140aa sslmode=require";
 $conn = pg_connect($dsn);
 if (!$conn) {
-    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    echo json_encode(["success" => false, "message" => "Connection Failed: " . pg_last_error()]);
     exit();
 }
 
