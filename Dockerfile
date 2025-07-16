@@ -4,6 +4,9 @@ FROM php:8.2-apache
 # Enable Apache mod_rewrite (optional, but common for PHP apps)
 RUN a2enmod rewrite
 
+# Install PostgreSQL extensions for PHP
+RUN docker-php-ext-install pgsql pdo_pgsql
+
 # Set the working directory to Apache's web root
 WORKDIR /var/www/html
 
