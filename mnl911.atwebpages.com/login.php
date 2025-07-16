@@ -16,8 +16,8 @@ if (!$conn) {
 
 // Get input data
 $input = json_decode(file_get_contents('php://input'), true);
-$email = $input['email'] ?? $_POST['email'] ?? '';
-$password = $input['password'] ?? $_POST['password'] ?? '';
+$email = $input['email'] ?? '';
+$password = $input['password'] ?? '';
 
 if (empty($email) || empty($password)) {
     echo json_encode(["success" => false, "message" => "Email and password are required."]);
