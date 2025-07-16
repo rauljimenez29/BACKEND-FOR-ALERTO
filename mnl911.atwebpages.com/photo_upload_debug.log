@@ -1,0 +1,615 @@
+2025-06-25T17:40:09+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate
+    [CONTENT_LENGTH] => 0
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => GET
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 64129
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 136.158.56.87
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_ACCEPT_LANGUAGE] => en-US,en;q=0.9
+    [HTTP_SEC_GPC] => 1
+    [HTTP_ACCEPT] => text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8
+    [HTTP_USER_AGENT] => Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36
+    [HTTP_UPGRADE_INSECURE_REQUESTS] => 1
+    [HTTP_CONNECTION] => close
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aFw0eYUz1d-JcNmRG5lAIwAAAMg
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1750873209.7256
+    [REQUEST_TIME] => 1750873209
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+)
+Array
+(
+)
+2025-06-25T17:45:32+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip, deflate, br
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 16604
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 54.86.50.139
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [CONTENT_LENGTH] => 79044
+    [CONTENT_TYPE] => multipart/form-data; boundary=----WebKitFormBoundarydfuCzRqlmvVGW33k
+    [HTTP_CONNECTION] => close
+    [HTTP_POSTMAN_TOKEN] => a6d748f0-8ac1-4dd9-8333-e5c186a9c2ae
+    [HTTP_CACHE_CONTROL] => no-cache
+    [HTTP_ACCEPT] => */*
+    [HTTP_USER_AGENT] => PostmanRuntime/7.44.1
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aFw1vBd6OR__my_pJT1mJAAAAQc
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1750873532.2792
+    [REQUEST_TIME] => 1750873532
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 9
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => 68435649a32b1_profile.jpg
+            [full_path] => 68435649a32b1_profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpWaIruG
+            [error] => 0
+            [size] => 78748
+        )
+
+)
+2025-06-25T17:50:43+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 19628
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 136.158.56.87
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_USER_AGENT] => okhttp/4.12.0
+    [HTTP_CONNECTION] => close
+    [CONTENT_LENGTH] => 104845
+    [CONTENT_TYPE] => multipart/form-data; boundary=8f8fa192-af9c-4bd4-937c-7f189201e0f3
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aFw28hd6OR__my_pJT1yogAAAQo
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1750873843.2334
+    [REQUEST_TIME] => 1750873843
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 9
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => profile.jpg
+            [full_path] => profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpZD7yEo
+            [error] => 0
+            [size] => 104526
+        )
+
+)
+2025-06-25T18:04:11+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 47616
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 136.158.56.87
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_USER_AGENT] => okhttp/4.12.0
+    [HTTP_CONNECTION] => close
+    [CONTENT_LENGTH] => 101184
+    [CONTENT_TYPE] => multipart/form-data; boundary=e20b8dca-3f70-4317-ae75-57f56660d1d3
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aFw6GnloiOLqoHoJzYxOoQAAAOM
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1750874651.3199
+    [REQUEST_TIME] => 1750874651
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 9
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => profile.jpg
+            [full_path] => profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpiBEteI
+            [error] => 0
+            [size] => 100865
+        )
+
+)
+2025-06-25T18:40:34+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 45577
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 136.158.29.145
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_USER_AGENT] => okhttp/4.12.0
+    [HTTP_CONNECTION] => close
+    [CONTENT_LENGTH] => 32503
+    [CONTENT_TYPE] => multipart/form-data; boundary=50dadfd9-0d11-4fad-ad9f-bc49a27e15f8
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aFxColLoqWphAsVgEQXFVAAAAUw
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1750876834.9898
+    [REQUEST_TIME] => 1750876834
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 14
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => profile.jpg
+            [full_path] => profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpe7ClTg
+            [error] => 0
+            [size] => 32184
+        )
+
+)
+2025-06-26T01:39:09+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 46084
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 122.55.206.130
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_USER_AGENT] => okhttp/4.9.2
+    [HTTP_CONNECTION] => close
+    [CONTENT_LENGTH] => 100691
+    [CONTENT_TYPE] => multipart/form-data; boundary=b4762d2f-f35f-4c60-8ea9-5fb092d709c8
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aFykvB6yuhUEwfNFOEdj3wAAAWQ
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1750901949.32
+    [REQUEST_TIME] => 1750901949
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 13
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => profile.jpg
+            [full_path] => profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpL1sKdv
+            [error] => 0
+            [size] => 100371
+        )
+
+)
+2025-07-02T11:17:10+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 55799
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 110.54.134.167
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_USER_AGENT] => okhttp/4.12.0
+    [HTTP_CONNECTION] => close
+    [CONTENT_LENGTH] => 1364242
+    [CONTENT_TYPE] => multipart/form-data; boundary=a5a49f3b-ad56-47a2-a9a2-118e03d67d74
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aGUVMVTAc5RKbG23qQnwhgAAAAU
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1751455030.8884
+    [REQUEST_TIME] => 1751455030
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 14
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => profile.jpg
+            [full_path] => profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpDWTpy2
+            [error] => 0
+            [size] => 1363921
+        )
+
+)
+2025-07-04T09:16:47+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 49216
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 136.158.29.145
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_USER_AGENT] => okhttp/4.12.0
+    [HTTP_CONNECTION] => close
+    [CONTENT_LENGTH] => 303269
+    [CONTENT_TYPE] => multipart/form-data; boundary=0118f058-87cb-4384-9d1b-1d2112fa2f0d
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aGeb_nJjPD-qhw37DpnCXAAAAIU
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1751620607.8331
+    [REQUEST_TIME] => 1751620607
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 14
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => profile.jpg
+            [full_path] => profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpuClWVT
+            [error] => 0
+            [size] => 302949
+        )
+
+)
+2025-07-12T14:40:15+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 50810
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 136.158.56.247
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_USER_AGENT] => okhttp/4.12.0
+    [HTTP_CONNECTION] => close
+    [CONTENT_LENGTH] => 24183
+    [CONTENT_TYPE] => multipart/form-data; boundary=8c5d48fe-64a5-4a02-9481-9869a3ed1a95
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aHJzz27rhhAv7Tjx3iarIAAAAMQ
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1752331215.648
+    [REQUEST_TIME] => 1752331215
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 12
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => profile.jpg
+            [full_path] => profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpIoQpFF
+            [error] => 0
+            [size] => 23864
+        )
+
+)
+2025-07-13T04:28:11+00:00
+Array
+(
+    [PATH] => /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    [PHP_FCGI_MAX_REQUESTS] => 200
+    [PHP_FCGI_CHILDREN] => 0
+    [HTTP_HOST] => mnl911.atwebpages.com
+    [SCRIPT_FILENAME] => /home/www/mnl911.atwebpages.com/upload_profile_photo1.php
+    [DOCUMENT_ROOT] => /home/www/mnl911.atwebpages.com
+    [HTTP_ACCEPT_ENCODING] => gzip
+    [SCRIPT_NAME] => /upload_profile_photo1.php
+    [REQUEST_URI] => /upload_profile_photo1.php
+    [QUERY_STRING] => 
+    [REQUEST_METHOD] => POST
+    [SERVER_PROTOCOL] => HTTP/1.1
+    [GATEWAY_INTERFACE] => CGI/1.1
+    [REMOTE_PORT] => 37876
+    [SERVER_ADMIN] => [no address given]
+    [CONTEXT_DOCUMENT_ROOT] => /home/domains/mnl911.atwebpages.com
+    [CONTEXT_PREFIX] => 
+    [REQUEST_SCHEME] => http
+    [REMOTE_ADDR] => 136.158.29.145
+    [SERVER_PORT] => 80
+    [SERVER_ADDR] => 185.176.43.100
+    [SERVER_NAME] => mnl911.atwebpages.com
+    [SERVER_SOFTWARE] => Apache
+    [SERVER_SIGNATURE] => 
+    [HTTP_USER_AGENT] => okhttp/4.9.2
+    [HTTP_CONNECTION] => close
+    [CONTENT_LENGTH] => 75645
+    [CONTENT_TYPE] => multipart/form-data; boundary=c9fce6b4-8397-47c9-b20d-e608be1ac8bf
+    [SCRIPT_URI] => http://mnl911.atwebpages.com/upload_profile_photo1.php
+    [SCRIPT_URL] => /upload_profile_photo1.php
+    [env_vhost] => mnl911.atwebpages.com
+    [UNIQUE_ID] => aHM12GHTSFuJPlUp6UjttwAAAV4
+    [FCGI_ROLE] => RESPONDER
+    [PHP_SELF] => /upload_profile_photo1.php
+    [REQUEST_TIME_FLOAT] => 1752380891.808
+    [REQUEST_TIME] => 1752380891
+    [argv] => Array
+        (
+        )
+
+    [argc] => 0
+)
+Array
+(
+    [nuser_id] => 14
+)
+Array
+(
+    [photo] => Array
+        (
+            [name] => profile.jpg
+            [full_path] => profile.jpg
+            [type] => image/jpeg
+            [tmp_name] => /tmp/phpVBqvzC
+            [error] => 0
+            [size] => 75326
+        )
+
+)
