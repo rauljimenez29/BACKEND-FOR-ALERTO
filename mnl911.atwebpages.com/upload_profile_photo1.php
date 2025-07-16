@@ -5,13 +5,12 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
-$dsn = "host=db.uyqspojnegjmxnedbtph.supabase.co port=5432 dbname=postgres user=postgres password=09123433140aa sslmode=require";
+$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
 $conn = pg_connect($dsn);
 if (!$conn) {
-    echo json_encode(["success" => false, "message" => "Connection Failed: " . pg_last_error()]);
+    echo "❌ Connection Failed: " . pg_last_error($conn);
     exit();
 }
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(["success" => false, "message" => "POST request required"]);
     exit();

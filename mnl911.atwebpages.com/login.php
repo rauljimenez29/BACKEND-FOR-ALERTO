@@ -6,11 +6,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 header("Content-Type: application/json");
 
-// Database credentials
-$dsn = "host=db.uyqspojnegjmxnedbtph.supabase.co port=5432 dbname=postgres user=postgres password=09123433140aa sslmode=require";
+// --- Connect to the database ---
+$dsn = "host=aws-0-ap-southeast-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.uyqspojnegjmxnedbtph password=09123433140aa sslmode=require";
 $conn = pg_connect($dsn);
 if (!$conn) {
-    echo json_encode(["success" => false, "message" => "Connection Failed: " . pg_last_error()]);
+    echo json_encode(['success' => false, 'message' => 'Database connection failed. Please contact support.']);
     exit();
 }
 
@@ -49,7 +49,7 @@ function handle_lockout($conn, $table, $email, $row, $user_type, $success_data) 
         if ($result) {
             echo json_encode($success_data);
         } else {
-            echo json_encode(["success" => false, "message" => "Failed to reset lockout: " . pg_last_error()]);
+            echo json_encode(["success" => false, "message" => "Failed to reset lockout: " . pg_last_error($conn)]);
         }
         pg_close($conn);
         exit();
@@ -98,7 +98,7 @@ function handle_lockout($conn, $table, $email, $row, $user_type, $success_data) 
                 "lockout" => false
             ]);
         } else {
-            echo json_encode(["success" => false, "message" => "Failed to update failed attempts: " . pg_last_error()]);
+            echo json_encode(["success" => false, "message" => "Failed to update failed attempts: " . pg_last_error($conn)]);
         }
         pg_close($conn);
         exit();
@@ -162,7 +162,7 @@ if ($result && pg_num_rows($result) > 0) {
                 if ($result_update) {
                     $row['account_status'] = 'P.Active';
                 } else {
-                    echo json_encode(["success" => false, "message" => "Failed to reactivate police user: " . pg_last_error()]);
+                    echo json_encode(["success" => false, "message" => "Failed to reactivate police user: " . pg_last_error($conn)]);
                     pg_close($conn);
                     exit();
                 }

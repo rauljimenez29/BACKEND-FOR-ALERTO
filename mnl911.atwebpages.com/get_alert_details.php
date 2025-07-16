@@ -8,10 +8,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
 $conn = pg_connect($dsn);
 if (!$conn) {
-    $response['error'] = "Connection Failed: " . pg_last_error();
+    $response['error'] = "Connection Failed: " . pg_last_error($conn);
     echo json_encode($response);
     exit();
 }
@@ -36,10 +36,10 @@ if (!$alert_id) {
 }
 
 // --- Connect to the database ---
-$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
 $conn = pg_connect($dsn);
 if (!$conn) {
-    $response['error'] = "Connection Failed: " . pg_last_error();
+    $response['error'] = "Connection Failed: " . pg_last_error($conn);
     echo json_encode($response);
     exit();
 }

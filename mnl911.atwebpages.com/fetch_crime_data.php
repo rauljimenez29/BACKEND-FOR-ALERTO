@@ -9,10 +9,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Database connection
-$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$dsn = "host=aws-0-ap-southeast-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.uyqspojnegjmxnedbtph password=09123433140aa sslmode=require";
 $conn = pg_connect($dsn);
 if (!$conn) {
-    die(json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]));
+    echo json_encode(['success' => false, 'message' => 'Database connection failed. Please contact support.']);
+    exit();
 }
 
 $sql = "

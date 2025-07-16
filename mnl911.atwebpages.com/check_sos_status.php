@@ -23,10 +23,10 @@ register_shutdown_function(function() {
 
 try {
     // --- DB credentials ---
-    $dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+    $dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
     $conn = pg_connect($dsn);
     if (!$conn) {
-        throw new Exception("Database connection failed: " . pg_last_error());
+        throw new Exception("Database connection failed: " . pg_last_error($conn));
     }
 
     // --- Require GET ---

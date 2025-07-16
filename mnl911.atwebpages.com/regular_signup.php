@@ -12,13 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Database credentials
-$dsn = "host=db.uyqspojnegjmxnedbtph.supabase.co port=5432 dbname=postgres user=postgres password=09123433140aa sslmode=require";
+$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
 $conn = pg_connect($dsn);
 if (!$conn) {
-    echo json_encode(["success" => false, "message" => "Connection Failed: " . pg_last_error()]);
+    echo "❌ Connection Failed: " . pg_last_error($conn);
     exit();
 }
-
 // Required fields
 $required = ['f_name', 'l_name', 'm_number', 'email', 'password', 'security_question', 'security_answer'];
 foreach ($required as $field) {
@@ -51,13 +50,12 @@ $hashed_password = password_hash($password_input, PASSWORD_DEFAULT);
 $hashed_answer = password_hash($security_answer_input, PASSWORD_DEFAULT);
 
 // Connect to database
-$dsn = "host=db.uyqspojnegjmxnedbtph.supabase.co port=5432 dbname=postgres user=postgres password=09123433140aa sslmode=require";
+$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
 $conn = pg_connect($dsn);
 if (!$conn) {
-    echo json_encode(["success" => false, "message" => "Connection Failed: " . pg_last_error()]);
+    echo "❌ Connection Failed: " . pg_last_error($conn);
     exit();
 }
-
 // Check if email already exists
 $check = pg_prepare($conn, "check_email", "SELECT nuser_id FROM normalusers WHERE email = $1");
 $check_result = pg_execute($conn, "check_email", [$email]);

@@ -11,13 +11,12 @@ ini_set('log_errors', 1);     // Log errors instead
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$dsn = "host=db.uyqspojnegjmxnedbtph.supabase.co port=5432 dbname=postgres user=postgres password=09123433140aa sslmode=require";
+$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
 $conn = pg_connect($dsn);
 if (!$conn) {
-    echo json_encode(["success" => false, "message" => "Connection Failed: " . pg_last_error()]);
+    echo "❌ Connection Failed: " . pg_last_error($conn);
     exit();
 }
-
 $alert_id = isset($_GET['alert_id']) ? intval($_GET['alert_id']) : 0;
 if (!$alert_id) {
     echo json_encode(['success' => false, 'error' => 'Missing alert_id']);

@@ -5,9 +5,7 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 // --- Database Connection ---
-// This uses the connection details from your provided schema host.
-// IMPORTANT: You will need to replace "your_database_password" with your actual password.
-$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
 $conn = pg_connect($dsn);
 if (!$conn) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed. Please contact support.']);
