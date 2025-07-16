@@ -8,11 +8,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
+$dsn = "host=aws-0-ap-southeast-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.uyqspojnegjmxnedbtph password=09123433140aa sslmode=require";
 $conn = pg_connect($dsn);
 if (!$conn) {
-    $response['error'] = "Connection Failed: " . pg_last_error($conn);
-    echo json_encode($response);
+    echo json_encode(['success' => false, 'message' => 'Database connection failed. Please contact support.']);
     exit();
 }
 
@@ -55,7 +54,7 @@ $sql = "SELECT
             nu.m_number 
         FROM sosalert sa
         JOIN normalusers nu ON sa.nuser_id = nu.nuser_id
-        WHERE sa.alert_id = ?";
+        WHERE sa.alert_id = $1";
 
 $stmt = pg_prepare($conn, "fetch_alert", $sql);
 $result = pg_execute($conn, "fetch_alert", array($alert_id));
@@ -63,16 +62,14 @@ $result = pg_execute($conn, "fetch_alert", array($alert_id));
 if ($result) {
     if (pg_num_rows($result) > 0) {
         $response['success'] = true;
-        $response['data'] = pg_fetch_assoc($result);
+        $response['details'] = pg_fetch_assoc($result);
     } else {
-        $response['error'] = "Alert with ID $alert_id not found.";
+        $response['error'] = "No details found for alert ID " . $alert_id;
     }
 } else {
-    $response['error'] = "Query execution failed: " . pg_last_error();
+    $response['error'] = "Query execution failed: " . pg_last_error($conn);
 }
-
-// --- Close connections and send response ---
+pg_free_result($result);
 pg_close($conn);
-
 echo json_encode($response);
 ?>

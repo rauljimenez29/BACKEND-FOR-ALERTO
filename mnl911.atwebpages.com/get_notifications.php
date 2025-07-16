@@ -4,10 +4,10 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header('Content-Type: application/json');
 
-$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
+$dsn = "host=aws-0-ap-southeast-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.uyqspojnegjmxnedbtph password=09123433140aa sslmode=require";
 $conn = pg_connect($dsn);
 if (!$conn) {
-    echo "❌ Connection Failed: " . pg_last_error($conn);
+    echo json_encode(['success' => false, 'message' => 'Database connection failed. Please contact support.']);
     exit();
 }
 $police_id = $_GET['police_id'] ?? $_POST['police_id'] ?? null;
@@ -15,8 +15,8 @@ $latitude = $_GET['latitude'] ?? $_POST['latitude'] ?? null;
 $longitude = $_GET['longitude'] ?? $_POST['longitude'] ?? null;
 
 if ($police_id) {
-    $stmt = pg_prepare($conn, "SELECT * FROM notifications WHERE police_id = $1 ORDER BY id DESC");
-    $result = pg_execute($conn, $stmt, [$police_id]);
+    $stmt = pg_prepare($conn, "fetch_notifications", "SELECT * FROM notifications WHERE police_id = $1 ORDER BY id DESC");
+    $result = pg_execute($conn, "fetch_notifications", [$police_id]);
     $notifications = [];
     while ($row = pg_fetch_assoc($result)) {
         // Only filter if both latitude and longitude are provided

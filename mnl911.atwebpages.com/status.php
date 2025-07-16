@@ -93,7 +93,7 @@ switch ($action) {
         try {
             // Get lat/lng
             $lat = null; $lng = null;
-            $stmt_coords = pg_prepare($conn, "get_coords", "SELECT a_latitude, a_longitude FROM sosalert WHERE alert_id = ?");
+            $stmt_coords = pg_prepare($conn, "get_coords", "SELECT a_latitude, a_longitude FROM sosalert WHERE alert_id = $1");
             $params = [$alert_id];
             $result = pg_execute($conn, "get_coords", $params);
             if ($result) {
@@ -110,7 +110,7 @@ switch ($action) {
 
             // Get type_id
             $type_id = null;
-            $stmt_type = pg_prepare($conn, "get_type_id", "SELECT type_id FROM crimetypes WHERE severity = ?");
+            $stmt_type = pg_prepare($conn, "get_type_id", "SELECT type_id FROM crimetypes WHERE severity = $1");
             $params = [$severity];
             $result = pg_execute($conn, "get_type_id", $params);
             if ($result) {
@@ -151,7 +151,7 @@ switch ($action) {
             pg_free_result($result);
 
             // Insert police history
-            $stmt_history = pg_prepare($conn, "insert_police_history", "INSERT INTO policehistory (alert_id, police_id, response_time, p_audio) VALUES (?, ?, NOW(), ?)");
+            $stmt_history = pg_prepare($conn, "insert_police_history", "INSERT INTO policehistory (alert_id, police_id, response_time, p_audio) VALUES ($1, $2, NOW(), $3)");
             $empty_audio = "";
             $params = [$alert_id, $police_id, $empty_audio];
             $result = pg_execute($conn, "insert_police_history", $params);

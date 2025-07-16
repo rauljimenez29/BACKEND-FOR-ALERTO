@@ -6,10 +6,10 @@ header("Content-Type: application/json");
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$dsn = 'postgresql://postgres.uyqspojnegjmxnedbtph:09123433140aa@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres';
+$dsn = "host=aws-0-ap-southeast-1.pooler.supabase.com port=5432 dbname=postgres user=postgres.uyqspojnegjmxnedbtph password=09123433140aa sslmode=require";
 $conn = pg_connect($dsn);
 if (!$conn) {
-    echo "❌ Connection Failed: " . pg_last_error($conn);
+    echo json_encode(['success' => false, 'message' => 'Database connection failed. Please contact support.']);
     exit();
 }
 
@@ -22,15 +22,12 @@ if ($step == '1') {
         echo json_encode(["success" => false, "message" => "Email is required"]);
         exit();
     }
-
-    $stmt = pg_prepare($conn, "SELECT security_question, 'regular' as user_type FROM normalusers WHERE email = $1
-                            UNION
-                            SELECT security_question, 'police' as user_type FROM policeusers WHERE email = $1");
-    $result = pg_execute($conn, "SELECT security_question, 'regular' as user_type FROM normalusers WHERE email = $1
-                            UNION
-                            SELECT security_question, 'police' as user_type FROM policeusers WHERE email = $1", array($email));
+    $sql = "SELECT security_question, 'regular' as user_type FROM normalusers WHERE email = $1
+            UNION
+            SELECT security_question, 'police' as user_type FROM policeusers WHERE email = $1";
+    $stmt = pg_prepare($conn, "fetch_security_question", $sql);
+    $result = pg_execute($conn, "fetch_security_question", array($email));
     $user = pg_fetch_assoc($result);
-
     if ($user) {
         echo json_encode([
             "success" => true,
@@ -40,7 +37,6 @@ if ($step == '1') {
     } else {
         echo json_encode(["success" => false, "message" => "Email not found"]);
     }
-
     pg_free_result($result);
     pg_close($conn);
     exit();

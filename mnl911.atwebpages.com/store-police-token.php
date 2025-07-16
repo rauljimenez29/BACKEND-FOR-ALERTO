@@ -38,7 +38,7 @@ if (!$conn) {
 }
 // --- Prepare and execute the UPDATE query ---
 // This updates the police user's row with their Expo push token
-$sql = "UPDATE policeusers SET expoPushToken = ? WHERE police_id = ?";
+$sql = "UPDATE policeusers SET expoPushToken = $1 WHERE police_id = $2";
 $stmt = pg_prepare($conn, "update_token", $sql);
 $params = [$token, $police_id];
 $result = pg_execute($conn, "update_token", $params);
@@ -46,7 +46,7 @@ $result = pg_execute($conn, "update_token", $params);
 if ($result) {
     echo json_encode(["success" => true, "message" => "Token stored successfully."]);
 } else {
-    echo json_encode(["success" => false, "message" => "Database update failed: " . pg_last_error()]);
+    echo json_encode(["success" => false, "message" => "Database update failed: " . pg_last_error($conn)]);
 }
 
 pg_close($conn);

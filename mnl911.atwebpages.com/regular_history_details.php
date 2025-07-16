@@ -45,7 +45,7 @@ if (isset($_GET['history_id'])) {
         LEFT JOIN policeusers pu ON ph.police_id = pu.police_id
         LEFT JOIN crimereports cr ON sa.alert_id = cr.alert_id
         LEFT JOIN crimetypes ct ON cr.type_id = ct.type_id
-        WHERE sa.alert_id = ?";
+        WHERE sa.alert_id = $1";
 
     $stmt = pg_prepare($conn, "get_history_details", $sql);
     $result = pg_execute($conn, "get_history_details", array($history_id));
@@ -59,7 +59,7 @@ if (isset($_GET['history_id'])) {
             $response['error'] = "No details found for alert_id " . $history_id;
         }
     } else {
-        $response['error'] = "Query execution failed: " . pg_last_error();
+        $response['error'] = "Query execution failed: " . pg_last_error($conn);
     }
     pg_free_result($result);
     pg_close_stmt($stmt);
