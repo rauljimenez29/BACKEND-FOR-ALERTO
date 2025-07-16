@@ -7,24 +7,18 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 $response = ['success' => false];
 
 if (isset($_GET['history_id'])) {
     $history_id = $_GET['history_id'];
 
-    $conn = new mysqli($host, $user, $password, $dbname);
-    if ($conn->connect_error) {
-        $response['error'] = "Connection Failed: " . $conn->connect_error;
-        echo json_encode($response);
-        exit();
-    }
-    
-    // This query now correctly selects `a_audio` from the `sosalert` table
     $sql = "SELECT
                 ph.history_id,
                 ph.response_time AS resolved_at,
@@ -47,24 +41,23 @@ if (isset($_GET['history_id'])) {
             JOIN policeusers pu ON ph.police_id = pu.police_id
             LEFT JOIN crimereports cr ON sa.alert_id = cr.alert_id
             LEFT JOIN crimetypes ct ON cr.type_id = ct.type_id
-            WHERE ph.history_id = ?";
+            WHERE ph.history_id = $1";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $history_id);
+    $stmt = pg_prepare($conn, "get_history_details", $sql);
+    $result = pg_execute($conn, "get_history_details", array($history_id));
     
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        if ($result->num_rows > 0) {
+    if ($result) {
+        if (pg_num_rows($result) > 0) {
             $response['success'] = true;
-            $response['details'] = $result->fetch_assoc();
+            $response['details'] = pg_fetch_assoc($result);
         } else {
              $response['error'] = "No details found for history ID " . $history_id;
         }
     } else {
-        $response['error'] = "Query execution failed: " . $stmt->error;
+        $response['error'] = "Query execution failed: " . pg_last_error();
     }
-    $stmt->close();
-    $conn->close();
+    pg_free_result($result);
+    pg_close($conn);
 } else {
     $response['error'] = "Required parameter 'history_id' is missing.";
 }

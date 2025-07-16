@@ -6,14 +6,10 @@ header("Content-Type: application/json");
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "Database connection failed"]);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
     exit();
 }
 
@@ -27,13 +23,13 @@ if ($step == '1') {
         exit();
     }
 
-    $stmt = $conn->prepare("SELECT security_question, 'regular' as user_type FROM normalusers WHERE email = ?
+    $stmt = pg_prepare($conn, "SELECT security_question, 'regular' as user_type FROM normalusers WHERE email = $1
                             UNION
-                            SELECT security_question, 'police' as user_type FROM policeusers WHERE email = ?");
-    $stmt->bind_param("ss", $email, $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
+                            SELECT security_question, 'police' as user_type FROM policeusers WHERE email = $1");
+    $result = pg_execute($conn, "SELECT security_question, 'regular' as user_type FROM normalusers WHERE email = $1
+                            UNION
+                            SELECT security_question, 'police' as user_type FROM policeusers WHERE email = $1", array($email));
+    $user = pg_fetch_assoc($result);
 
     if ($user) {
         echo json_encode([
@@ -45,8 +41,8 @@ if ($step == '1') {
         echo json_encode(["success" => false, "message" => "Email not found"]);
     }
 
-    $stmt->close();
-    $conn->close();
+    pg_free_result($result);
+    pg_close($conn);
     exit();
 }
 
@@ -59,18 +55,18 @@ if ($step == '2') {
     }
 
     if ($user_type === 'regular') {
-        $stmt = $conn->prepare("SELECT security_answer FROM normalusers WHERE email = ?");
+        $stmt = pg_prepare($conn, "SELECT security_answer FROM normalusers WHERE email = $1");
     } elseif ($user_type === 'police') {
-        $stmt = $conn->prepare("SELECT security_answer FROM policeusers WHERE email = ?");
+        $stmt = pg_prepare($conn, "SELECT security_answer FROM policeusers WHERE email = $1");
     } else {
         echo json_encode(["success" => false, "message" => "Invalid user type"]);
         exit();
     }
 
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $stmt->bind_result($stored_hash);
-    if ($stmt->fetch()) {
+    $result = pg_execute($conn, $stmt, array($email));
+    $stored_hash = pg_fetch_result($result, 0, 0);
+
+    if ($stored_hash) {
         if (password_verify($answer, $stored_hash)) {
             echo json_encode(["success" => true]);
         } else {
@@ -80,11 +76,11 @@ if ($step == '2') {
         echo json_encode(["success" => false, "message" => "User not found"]);
     }
 
-    $stmt->close();
-    $conn->close();
+    pg_free_result($result);
+    pg_close($conn);
     exit();
 }
 
 echo json_encode(["success" => false, "message" => "Invalid request"]);
-$conn->close();
+pg_close($conn);
 ?>

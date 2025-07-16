@@ -12,11 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Accept both form data and JSON
@@ -29,24 +30,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $a_created = date('Y-m-d H:i:s');
 
     if ($nuser_id && $a_latitude && $a_longitude) {
-        $stmt = $conn->prepare("INSERT INTO sosalert (nuser_id, a_created, a_latitude, a_longitude, a_address, a_status, a_audio) VALUES (?, ?, ?, ?, ?, 'pending', ?)");
-        $stmt->bind_param('isddss', $nuser_id, $a_created, $a_latitude, $a_longitude, $a_address, $a_audio);
-        if ($stmt->execute()) {
+        $stmt = pg_prepare($conn, "INSERT INTO sosalert (nuser_id, a_created, a_latitude, a_longitude, a_address, a_status, a_audio) VALUES ($1, $2, $3, $4, $5, 'pending', $6)");
+        $params = array($nuser_id, $a_created, $a_latitude, $a_longitude, $a_address, $a_audio);
+        $result = pg_execute($conn, "INSERT INTO sosalert (nuser_id, a_created, a_latitude, a_longitude, a_address, a_status, a_audio) VALUES ($1, $2, $3, $4, $5, 'pending', $6)", $params);
+
+        if ($result) {
+            $row = pg_fetch_assoc($result);
             echo json_encode([
                 'success' => true,
-                'alert_id' => $conn->insert_id,
+                'alert_id' => $row['id'],
                 'debug_received_lat' => $a_latitude,
                 'debug_received_lng' => $a_longitude
             ]);
         } else {
-            echo json_encode(['success' => false, 'error' => $stmt->error]);
+            echo json_encode(['success' => false, 'error' => pg_last_error($conn)]);
         }
-        $stmt->close();
+        pg_free_result($result);
     } else {
         echo json_encode(['success' => false, 'error' => 'Missing required fields']);
     }
 } else {
     echo json_encode(['success' => false, 'error' => 'Invalid request method']);
 }
-$conn->close();
+pg_close($conn);
 ?>

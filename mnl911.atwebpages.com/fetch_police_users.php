@@ -10,14 +10,11 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Connection (Stays the same) ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Connection failed"]));
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
 }
 
 // --- UPDATED SQL Query to fetch the new columns ---
@@ -37,14 +34,15 @@ $sql = "SELECT
         FROM 
             policeusers";
 
-$result = $conn->query($sql);
+$result = pg_query($conn, $sql);
 
 if (!$result) {
-    die(json_encode(["success" => false, "message" => "SQL query failed: " . $conn->error]));
+    echo json_encode(["success" => false, "message" => "SQL query failed: " . pg_last_error()]);
+    exit();
 }
 
 $officers = [];
-while ($row = $result->fetch_assoc()) {
+while ($row = pg_fetch_assoc($result)) {
     // Mask password and the real security answer for security
     $row['password'] = '••••••••';
     $row['securityAnswer'] = '••••••••'; // We still mask the answer, but now it's masking the real one
@@ -55,5 +53,5 @@ while ($row = $result->fetch_assoc()) {
 // Send response using "officers" to match the React Native code
 echo json_encode(["success" => true, "officers" => $officers]);
 
-$conn->close();
+pg_close($conn);
 ?>

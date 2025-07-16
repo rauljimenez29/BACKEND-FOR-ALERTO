@@ -12,11 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $police_id = $_GET['police_id'] ?? null;
@@ -29,12 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     }
 
     // --- NEW: Check if police is on shift ---
-    $check_shift = $conn->prepare("SELECT is_on_shift FROM policeusers WHERE police_id = ?");
-    $check_shift->bind_param("i", $police_id);
-    $check_shift->execute();
-    $check_shift->bind_result($is_on_shift);
-    $check_shift->fetch();
-    $check_shift->close();
+    $check_shift_stmt = pg_prepare($conn, "check_shift", "SELECT is_on_shift FROM policeusers WHERE police_id = $1");
+    $check_shift_params = [$police_id];
+    $check_shift_result = pg_execute($conn, "check_shift", $check_shift_params);
+    $is_on_shift = pg_fetch_result($check_shift_result, 0, 0);
+    pg_free_result($check_shift_result);
+    pg_close_stmt($check_shift_stmt);
 
     if ($is_on_shift != 1) {
         echo json_encode([
@@ -43,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             'timestamp' => time(),
             'count' => 0
         ]);
-        $conn->close();
+        pg_close($conn);
         exit();
     }
 
@@ -55,11 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
               ORDER BY a.a_created DESC 
               LIMIT 20"; // Reduced from 50 to 20 for faster response
     
-    $result = $conn->query($query);
+    $result = pg_query($conn, $query);
     $notifications = [];
     
     if ($result) {
-        while ($row = $result->fetch_assoc()) {
+        while ($row = pg_fetch_assoc($result)) {
             // If police location is provided, check if within 10km radius (increased for better coverage)
             if ($police_lat && $police_lng) {
                 $alert_lat = floatval($row['a_latitude']);
@@ -106,5 +107,5 @@ function calculateDistance($lat1, $lon1, $lat2, $lon2) {
     return $R * $c;
 }
 
-$conn->close();
+pg_close($conn);
 ?>

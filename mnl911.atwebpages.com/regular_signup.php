@@ -12,10 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 // Database credentials
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 // Required fields
 $required = ['f_name', 'l_name', 'm_number', 'email', 'password', 'security_question', 'security_answer'];
@@ -49,33 +51,32 @@ $hashed_password = password_hash($password_input, PASSWORD_DEFAULT);
 $hashed_answer = password_hash($security_answer_input, PASSWORD_DEFAULT);
 
 // Connect to database
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
     exit();
 }
 
 // Check if email already exists
-$check = $conn->prepare("SELECT nuser_id FROM normalusers WHERE email = ?");
-$check->bind_param("s", $email);
-$check->execute();
-$check->store_result();
-if ($check->num_rows > 0) {
+$check = pg_prepare($conn, "check_email", "SELECT nuser_id FROM normalusers WHERE email = $1");
+$check_result = pg_execute($conn, "check_email", [$email]);
+if (pg_num_rows($check_result) > 0) {
     echo json_encode(["success" => false, "message" => "Email already registered"]);
-    $check->close();
-    $conn->close();
+    pg_free_result($check_result);
+    pg_close($conn);
     exit();
 }
-$check->close();
+pg_free_result($check_result);
 
 // Insert user
 $sql = "INSERT INTO normalusers (f_name, l_name, m_number, email, password, security_question, security_answer)
-        VALUES (?, ?, ?, ?, ?, ?, ?)";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("sssssss", $f_name, $l_name, $m_number, $email, $hashed_password, $security_question, $hashed_answer);
+        VALUES ($1, $2, $3, $4, $5, $6, $7)";
+$stmt = pg_prepare($conn, "insert_user", $sql);
+$stmt_result = pg_execute($conn, "insert_user", [$f_name, $l_name, $m_number, $email, $hashed_password, $security_question, $hashed_answer]);
 
-if ($stmt->execute()) {
-    $nuser_id = $stmt->insert_id;
+if ($stmt_result) {
+    $nuser_id = pg_fetch_result($stmt_result, 0, 0); // Assuming nuser_id is the first column of the first row
     echo json_encode([
         "success" => true,
         "nuser_id" => $nuser_id,
@@ -90,6 +91,6 @@ if ($stmt->execute()) {
     echo json_encode(["success" => false, "message" => "Signup failed"]);
 }
 
-$stmt->close();
-$conn->close();
+pg_free_result($stmt_result);
+pg_close($conn);
 ?>

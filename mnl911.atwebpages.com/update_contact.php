@@ -4,11 +4,12 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header('Content-Type: application/json');
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_id = $_POST['contact_id'];
@@ -16,17 +17,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $contact_number = $_POST['contact_number'];
     $relationship = $_POST['relationship'];
 
-    $stmt = $conn->prepare("UPDATE usercontacts SET contact_name = ?, contact_number = ?, relationship = ? WHERE contact_id = ?");
-    $stmt->bind_param("sssi", $contact_name, $contact_number, $relationship, $contact_id);
+    $stmt = pg_prepare($conn, "UPDATE usercontacts SET contact_name = $1, contact_number = $2, relationship = $3 WHERE contact_id = $4", array($contact_name, $contact_number, $relationship, $contact_id));
+    $result = pg_execute($conn, "UPDATE usercontacts SET contact_name = $1, contact_number = $2, relationship = $3 WHERE contact_id = $4", array($contact_name, $contact_number, $relationship, $contact_id));
 
-    if ($stmt->execute()) {
+    if ($result) {
         echo json_encode(['success' => true]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Failed to update contact']);
     }
-    $stmt->close();
+    pg_free_result($result);
 } else {
     echo json_encode(['success' => false, 'message' => 'POST request required']);
 }
-$conn->close();
+pg_close($conn);
 ?>

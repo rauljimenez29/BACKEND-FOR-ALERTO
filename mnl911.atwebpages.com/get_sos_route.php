@@ -11,17 +11,11 @@ ini_set('log_errors', 1);     // Log errors instead
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-// Create the connection
-$conn = new mysqli($host, $user, $password, $dbname);
-
-if ($conn->connect_error) {
-    echo json_encode(['success' => false, 'error' => 'Database connection failed']);
-    exit;
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
 }
 
 $alert_id = isset($_GET['alert_id']) ? intval($_GET['alert_id']) : 0;
@@ -31,11 +25,10 @@ if (!$alert_id) {
 }
 
 // Get user location from sosalert
-$userQuery = $conn->prepare("SELECT a_latitude, a_longitude, nuser_id FROM sosalert WHERE alert_id = ?");
-$userQuery->bind_param("i", $alert_id);
-$userQuery->execute();
-$userResult = $userQuery->get_result();
-$userData = $userResult->fetch_assoc();
+$userQuery = pg_prepare($conn, "get_user_location", "SELECT a_latitude, a_longitude, nuser_id FROM sosalert WHERE alert_id = $1");
+pg_execute($conn, "get_user_location", [$alert_id]);
+$userResult = pg_get_result($conn);
+$userData = pg_fetch_assoc($userResult);
 
 if (!$userData) {
     echo json_encode(['success' => false, 'error' => 'Alert not found']);
@@ -43,11 +36,10 @@ if (!$userData) {
 }
 
 // Get officer_id from sosofficerassignments
-$officerQuery = $conn->prepare("SELECT police_id FROM sosofficerassignments WHERE alert_id = ? AND status = 'assigned' ORDER BY assigned_at DESC LIMIT 1");
-$officerQuery->bind_param("i", $alert_id);
-$officerQuery->execute();
-$officerResult = $officerQuery->get_result();
-$officerData = $officerResult->fetch_assoc();
+$officerQuery = pg_prepare($conn, "get_officer_assignment", "SELECT police_id FROM sosofficerassignments WHERE alert_id = $1 AND status = 'assigned' ORDER BY assigned_at DESC LIMIT 1");
+pg_execute($conn, "get_officer_assignment", [$alert_id]);
+$officerResult = pg_get_result($conn);
+$officerData = pg_fetch_assoc($officerResult);
 
 if (!$officerData) {
     echo json_encode(['success' => false, 'error' => 'No officer assigned']);
@@ -55,11 +47,10 @@ if (!$officerData) {
 }
 
 // Get officer location from policeusers
-$policeQuery = $conn->prepare("SELECT latitude, longitude FROM police_locations WHERE police_id = ? ORDER BY updated_at DESC LIMIT 1");
-$policeQuery->bind_param("i", $police_id);
-$policeQuery->execute();
-$policeResult = $policeQuery->get_result();
-$policeData = $policeResult->fetch_assoc();
+$policeQuery = pg_prepare($conn, "get_police_location", "SELECT latitude, longitude FROM police_locations WHERE police_id = $1 ORDER BY updated_at DESC LIMIT 1");
+pg_execute($conn, "get_police_location", [$officerData['police_id']]);
+$policeResult = pg_get_result($conn);
+$policeData = pg_fetch_assoc($policeResult);
 
 if (!$policeData) {
     echo json_encode(['success' => false, 'error' => 'Officer location not found']);
@@ -77,5 +68,5 @@ echo json_encode([
         'lng' => floatval($policeData['longitude'])
     ]
 ]);
-$conn->close();
+pg_close($conn);
 ?>

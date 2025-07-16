@@ -5,12 +5,12 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
 header("Content-Type: application/json");
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(["success" => false, "message" => "POST request required"]);
@@ -37,17 +37,17 @@ if (move_uploaded_file($_FILES['photo']['tmp_name'], $target_file)) {
     // Save the URL (adjust this to your actual domain/path)
     $photo_url = "http://mnl911.atwebpages.com/" . $target_file;
 
-    $stmt = $conn->prepare("UPDATE normalusers SET photo_url = ? WHERE nuser_id = ?");
-    $stmt->bind_param("si", $photo_url, $nuser_id);
-    if ($stmt->execute()) {
+    $stmt = pg_prepare($conn, "UPDATE normalusers SET photo_url = $1 WHERE nuser_id = $2", array($photo_url, $nuser_id));
+    $result = pg_execute($conn, "UPDATE normalusers SET photo_url = $1 WHERE nuser_id = $2", array($photo_url, $nuser_id));
+    if ($result) {
         echo json_encode(["success" => true, "photo_url" => $photo_url]);
     } else {
         echo json_encode(["success" => false, "message" => "DB update failed"]);
     }
-    $stmt->close();
+    pg_free_result($result);
 } else {
     echo json_encode(["success" => false, "message" => "File upload failed"]);
 }
 
-$conn->close();
+pg_close($conn);
 ?>

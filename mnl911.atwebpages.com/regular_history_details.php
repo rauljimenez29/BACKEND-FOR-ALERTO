@@ -8,16 +8,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-$response = ['success' => false];
-
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    $response['error'] = "Connection Failed: " . $conn->connect_error;
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    $response['error'] = "Connection Failed: " . pg_last_error();
     echo json_encode($response);
     exit();
 }
@@ -53,12 +47,11 @@ if (isset($_GET['history_id'])) {
         LEFT JOIN crimetypes ct ON cr.type_id = ct.type_id
         WHERE sa.alert_id = ?";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $history_id);
+    $stmt = pg_prepare($conn, "get_history_details", $sql);
+    $result = pg_execute($conn, "get_history_details", array($history_id));
     
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
-        $details = $result->fetch_assoc();
+    if ($result) {
+        $details = pg_fetch_assoc($result);
         if ($details) {
             $response['success'] = true;
             $response['details'] = $details;
@@ -66,13 +59,14 @@ if (isset($_GET['history_id'])) {
             $response['error'] = "No details found for alert_id " . $history_id;
         }
     } else {
-        $response['error'] = "Query execution failed: " . $stmt->error;
+        $response['error'] = "Query execution failed: " . pg_last_error();
     }
-    $stmt->close();
+    pg_free_result($result);
+    pg_close_stmt($stmt);
 } else {
     $response['error'] = "Required parameter 'history_id' is missing.";
 }
 
-$conn->close();
+pg_close($conn);
 echo json_encode($response);
 ?>

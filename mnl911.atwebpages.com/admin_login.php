@@ -7,16 +7,9 @@ ini_set('display_errors', 1);
 // --- Database Connection ---
 // This uses the connection details from your provided schema host.
 // IMPORTANT: You will need to replace "your_database_password" with your actual password.
-$servername = "fdb1028.awardspace.net";
-$username = "4642576_crimemap";
-$password = "@CrimeMap_911"; // <-- IMPORTANT: REPLACE WITH YOUR PASSWORD
-$dbname = "4642576_crimemap";
-
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
     echo json_encode(['success' => false, 'message' => 'Database connection failed. Please contact support.']);
     exit();
 }
@@ -30,18 +23,16 @@ $password = $input['password'] ?? '';
 // Basic validation
 if (empty($email) || empty($password)) {
     echo json_encode(['success' => false, 'message' => 'Email and password are required.']);
-    $conn->close();
+    pg_close($conn);
     exit;
 }
 
 // Prepare and bind to prevent SQL injection
-$stmt = $conn->prepare("SELECT admin_id, password FROM adminusers WHERE BINARY email = ?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
+$stmt = pg_prepare($conn, "SELECT admin_id, password FROM adminusers WHERE BINARY email = $1");
+$result = pg_execute($conn, "SELECT admin_id, password FROM adminusers WHERE BINARY email = $1", array($email));
 
-if ($result->num_rows === 1) {
-    $row = $result->fetch_assoc();
+if (pg_num_rows($result) === 1) {
+    $row = pg_fetch_assoc($result);
     $hashed_password = $row['password'];
 
     // Verify the password against the stored hash.
@@ -58,6 +49,5 @@ if ($result->num_rows === 1) {
     echo json_encode(['success' => false, 'message' => 'Invalid credentials provided.']);
 }
 
-$stmt->close();
-$conn->close();
+pg_close($conn);
 ?> 

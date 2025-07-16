@@ -9,20 +9,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Check police users and their tokens
     $sql = "SELECT police_id, expoPushToken, f_name, l_name FROM policeusers LIMIT 50";
-    $result = $conn->query($sql);
+    $result = pg_query($conn, $sql);
     
     $police_users = [];
     if ($result) {
-        while ($row = $result->fetch_assoc()) {
+        while ($row = pg_fetch_assoc($result)) {
             $police_users[] = [
                 'police_id' => $row['police_id'],
                 'name' => $row['f_name'] . ' ' . $row['l_name'],
@@ -42,5 +43,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     echo json_encode(['success' => false, 'error' => 'GET request required']);
 }
 
-$conn->close();
+pg_close($conn);
 ?> 

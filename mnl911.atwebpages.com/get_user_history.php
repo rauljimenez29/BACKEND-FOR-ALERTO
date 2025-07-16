@@ -4,11 +4,12 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header('Content-Type: application/json');
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 if (isset($_GET['nuser_id'])) {
     $nuser_id = $_GET['nuser_id'];
@@ -25,16 +26,14 @@ if (isset($_GET['nuser_id'])) {
             FROM sosalert sa
             JOIN normalusers nu ON sa.nuser_id = nu.nuser_id
             LEFT JOIN policehistory ph ON sa.alert_id = ph.alert_id
-            WHERE sa.nuser_id = ?
+            WHERE sa.nuser_id = $1
             ORDER BY sa.alert_id DESC";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $nuser_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = pg_prepare($conn, "get_user_history", $sql);
+    $result = pg_execute($conn, "get_user_history", array($nuser_id));
     
     $history = array();
-    while ($row = $result->fetch_assoc()) {
+    while ($row = pg_fetch_assoc($result)) {
         $history[] = $row;
     }
     
@@ -43,12 +42,12 @@ if (isset($_GET['nuser_id'])) {
         "history" => $history
     ]);
     
-    $stmt->close();
+    pg_free_result($result);
+    pg_close($conn);
 } else {
     echo json_encode([
         "success" => false, 
         "message" => "nuser_id required"
     ]);
 }
-$conn->close();
 ?>

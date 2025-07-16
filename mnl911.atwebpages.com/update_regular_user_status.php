@@ -7,10 +7,12 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Database credentials
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 // Only allow POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -29,31 +31,25 @@ if (!$nuser_id || !$account_status) {
     exit();
 }
 
-// Connect to database
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]);
-    exit();
-}
-
 // Prepare SQL
 if ($account_status === 'Terminated') {
     $sql = "UPDATE normalusers SET account_status = ?, termination_reason = ? WHERE nuser_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi", $account_status, $termination_reason, $nuser_id);
+    $stmt = pg_prepare($conn, "update_status", $sql);
+    $params = array($account_status, $termination_reason, $nuser_id);
 } else {
     // For 'Active' status, clear the termination reason
     $sql = "UPDATE normalusers SET account_status = ?, termination_reason = NULL WHERE nuser_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $account_status, $nuser_id);
+    $stmt = pg_prepare($conn, "update_status", $sql);
+    $params = array($account_status, $nuser_id);
 }
 
-if ($stmt->execute()) {
+$result = pg_execute($conn, "update_status", $params);
+
+if ($result) {
     echo json_encode(["success" => true, "message" => "Status updated successfully"]);
 } else {
     echo json_encode(["success" => false, "message" => "Failed to update status"]);
 }
 
-$stmt->close();
-$conn->close();
+pg_close($conn);
 ?>

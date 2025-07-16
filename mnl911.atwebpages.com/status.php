@@ -11,13 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
     echo json_encode(['success' => false, 'error' => 'Database connection failed']);
     exit();
 }
@@ -39,24 +35,29 @@ switch ($action) {
         }
         // Assign officer
         $sql_assign = "INSERT INTO sosofficerassignments (alert_id, police_id, assigned_at, status) VALUES (?, ?, NOW(), 'assigned')";
-        $stmt_assign = $conn->prepare($sql_assign);
-        $stmt_assign->bind_param("ii", $alert_id, $police_id);
-        if ($stmt_assign->execute()) {
+        $stmt_assign = pg_prepare($conn, "assign_alert", $sql_assign);
+        $params = [$alert_id, $police_id];
+        $result = pg_execute($conn, "assign_alert", $params);
+        if ($result) {
             // Update alert status
             $sql_update = "UPDATE sosalert SET a_status = 'active' WHERE alert_id = ?";
-            $stmt_update = $conn->prepare($sql_update);
-            $stmt_update->bind_param("i", $alert_id);
-            $stmt_update->execute();
-            $stmt_update->close();
-            echo json_encode(['success' => true, 'message' => 'Alert assigned successfully.']);
+            $stmt_update = pg_prepare($conn, "update_alert_status", $sql_update);
+            $params = [$alert_id];
+            $result = pg_execute($conn, "update_alert_status", $params);
+            if ($result) {
+                echo json_encode(['success' => true, 'message' => 'Alert assigned successfully.']);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Database error: ' . pg_last_error($conn)]);
+            }
+            pg_free_result($result);
         } else {
-            if ($conn->errno == 1062) {
+            if (pg_last_error($conn) == '23505') { // Duplicate key error for alert_id
                 echo json_encode(['success' => false, 'error' => 'This alert has already been assigned.']);
             } else {
-                echo json_encode(['success' => false, 'error' => 'Database error: ' . $stmt_assign->error]);
+                echo json_encode(['success' => false, 'error' => 'Database error: ' . pg_last_error($conn)]);
             }
         }
-        $stmt_assign->close();
+        pg_free_result($result);
         break;
 
     case 'arrived':
@@ -64,18 +65,19 @@ switch ($action) {
             echo json_encode(['success' => false, 'error' => 'Missing alert_id']);
             break;
         }
-        $stmt = $conn->prepare("UPDATE sosalert SET a_status = 'arrived' WHERE alert_id = ?");
-        $stmt->bind_param("i", $alert_id);
-        if ($stmt->execute()) {
-            if ($stmt->affected_rows > 0) {
+        $stmt = pg_prepare($conn, "update_alert_arrived", "UPDATE sosalert SET a_status = 'arrived' WHERE alert_id = ?");
+        $params = [$alert_id];
+        $result = pg_execute($conn, "update_alert_arrived", $params);
+        if ($result) {
+            if (pg_affected_rows($result) > 0) {
                 echo json_encode(['success' => true, 'message' => 'Alert status updated to arrived']);
             } else {
                 echo json_encode(['success' => false, 'error' => 'No rows updated. Check alert_id.']);
             }
         } else {
-            echo json_encode(['success' => false, 'error' => $stmt->error]);
+            echo json_encode(['success' => false, 'error' => pg_last_error($conn)]);
         }
-        $stmt->close();
+        pg_free_result($result);
         break;
 
     case 'resolve':
@@ -91,49 +93,72 @@ switch ($action) {
         try {
             // Get lat/lng
             $lat = null; $lng = null;
-            $stmt_coords = $conn->prepare("SELECT a_latitude, a_longitude FROM sosalert WHERE alert_id = ?");
-            $stmt_coords->bind_param("i", $alert_id);
-            $stmt_coords->execute();
-            $stmt_coords->bind_result($lat, $lng);
-            $stmt_coords->fetch();
-            $stmt_coords->close();
+            $stmt_coords = pg_prepare($conn, "get_coords", "SELECT a_latitude, a_longitude FROM sosalert WHERE alert_id = ?");
+            $params = [$alert_id];
+            $result = pg_execute($conn, "get_coords", $params);
+            if ($result) {
+                $row = pg_fetch_assoc($result);
+                if ($row) {
+                    $lat = $row['a_latitude'];
+                    $lng = $row['a_longitude'];
+                }
+            } else {
+                throw new Exception("No coordinates found: " . pg_last_error($conn));
+            }
+            pg_free_result($result);
             if ($lat === null || $lng === null) throw new Exception("No coordinates found.");
 
             // Get type_id
             $type_id = null;
-            $stmt_type = $conn->prepare("SELECT type_id FROM crimetypes WHERE severity = ?");
-            $stmt_type->bind_param("s", $severity);
-            $stmt_type->execute();
-            $stmt_type->bind_result($fetched_type_id);
-            if ($stmt_type->fetch()) $type_id = $fetched_type_id;
-            $stmt_type->close();
+            $stmt_type = pg_prepare($conn, "get_type_id", "SELECT type_id FROM crimetypes WHERE severity = ?");
+            $params = [$severity];
+            $result = pg_execute($conn, "get_type_id", $params);
+            if ($result) {
+                $row = pg_fetch_assoc($result);
+                if ($row) $type_id = $row['type_id'];
+            } else {
+                throw new Exception("Invalid severity: " . pg_last_error($conn));
+            }
+            pg_free_result($result);
             if ($type_id === null) throw new Exception("Invalid severity.");
 
             // Insert crime report
             $default_zone_id = 1;
-            $stmt_report = $conn->prepare("INSERT INTO crimereports (alert_id, zone_id, type_id, description, latitude, longtitude, report_time, crime_type) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)");
-            $stmt_report->bind_param("iiisdds", $alert_id, $default_zone_id, $type_id, $description, $lat, $lng, $incident_type);
-            $stmt_report->execute();
-            $stmt_report->close();
+            $stmt_report = pg_prepare($conn, "insert_crime_report", "INSERT INTO crimereports (alert_id, zone_id, type_id, description, latitude, longtitude, report_time, crime_type) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)");
+            $params = [$alert_id, $default_zone_id, $type_id, $description, $lat, $lng, $incident_type];
+            $result = pg_execute($conn, "insert_crime_report", $params);
+            if (!$result) {
+                throw new Exception("Failed to insert crime report: " . pg_last_error($conn));
+            }
+            pg_free_result($result);
 
             // Update alert status
-            $stmt_alert = $conn->prepare("UPDATE sosalert SET a_status = 'resolved' WHERE alert_id = ?");
-            $stmt_alert->bind_param("i", $alert_id);
-            $stmt_alert->execute();
-            $stmt_alert->close();
+            $stmt_alert = pg_prepare($conn, "update_alert_resolved", "UPDATE sosalert SET a_status = 'resolved' WHERE alert_id = ?");
+            $params = [$alert_id];
+            $result = pg_execute($conn, "update_alert_resolved", $params);
+            if (!$result) {
+                throw new Exception("Failed to update alert status: " . pg_last_error($conn));
+            }
+            pg_free_result($result);
 
             // Update resolved_at in sosofficerassignments
-            $stmt_assignment = $conn->prepare("UPDATE sosofficerassignments SET resolved_at = NOW() WHERE alert_id = ? AND police_id = ?");
-            $stmt_assignment->bind_param("ii", $alert_id, $police_id);
-            $stmt_assignment->execute();
-            $stmt_assignment->close();
+            $stmt_assignment = pg_prepare($conn, "update_assignment_resolved", "UPDATE sosofficerassignments SET resolved_at = NOW() WHERE alert_id = ? AND police_id = ?");
+            $params = [$alert_id, $police_id];
+            $result = pg_execute($conn, "update_assignment_resolved", $params);
+            if (!$result) {
+                throw new Exception("Failed to update assignment resolved_at: " . pg_last_error($conn));
+            }
+            pg_free_result($result);
 
             // Insert police history
-            $stmt_history = $conn->prepare("INSERT INTO policehistory (alert_id, police_id, response_time, p_audio) VALUES (?, ?, NOW(), ?)");
+            $stmt_history = pg_prepare($conn, "insert_police_history", "INSERT INTO policehistory (alert_id, police_id, response_time, p_audio) VALUES (?, ?, NOW(), ?)");
             $empty_audio = "";
-            $stmt_history->bind_param("iis", $alert_id, $police_id, $empty_audio);
-            $stmt_history->execute();
-            $stmt_history->close();
+            $params = [$alert_id, $police_id, $empty_audio];
+            $result = pg_execute($conn, "insert_police_history", $params);
+            if (!$result) {
+                throw new Exception("Failed to insert police history: " . pg_last_error($conn));
+            }
+            pg_free_result($result);
 
             $conn->commit();
             echo json_encode(['success' => true, 'message' => 'Incident resolved and report filed successfully.']);
@@ -147,5 +172,5 @@ switch ($action) {
         echo json_encode(['success' => false, 'error' => 'Invalid action']);
 }
 
-$conn->close();
+pg_close($conn);
 ?>

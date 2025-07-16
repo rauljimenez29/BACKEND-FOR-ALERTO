@@ -8,10 +8,13 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    $response['error'] = "Connection Failed: " . pg_last_error();
+    echo json_encode($response);
+    exit();
+}
 
 // --- Response Object ---
 $response = ['success' => false];
@@ -33,9 +36,10 @@ if (!$alert_id) {
 }
 
 // --- Connect to the database ---
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    $response['error'] = "Connection Failed: " . $conn->connect_error;
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    $response['error'] = "Connection Failed: " . pg_last_error();
     echo json_encode($response);
     exit();
 }
@@ -53,24 +57,22 @@ $sql = "SELECT
         JOIN normalusers nu ON sa.nuser_id = nu.nuser_id
         WHERE sa.alert_id = ?";
 
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $alert_id);
+$stmt = pg_prepare($conn, "fetch_alert", $sql);
+$result = pg_execute($conn, "fetch_alert", array($alert_id));
 
-if ($stmt->execute()) {
-    $result = $stmt->get_result();
-    if ($result->num_rows > 0) {
+if ($result) {
+    if (pg_num_rows($result) > 0) {
         $response['success'] = true;
-        $response['data'] = $result->fetch_assoc();
+        $response['data'] = pg_fetch_assoc($result);
     } else {
         $response['error'] = "Alert with ID $alert_id not found.";
     }
 } else {
-    $response['error'] = "Query execution failed: " . $stmt->error;
+    $response['error'] = "Query execution failed: " . pg_last_error();
 }
 
 // --- Close connections and send response ---
-$stmt->close();
-$conn->close();
+pg_close($conn);
 
 echo json_encode($response);
 ?>

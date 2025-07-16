@@ -6,21 +6,22 @@ header('Content-Type: application/json');
   ini_set('display_errors', 1);
   error_reporting(E_ALL);
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 $sql = "SELECT * FROM sosalert WHERE a_status = 'pending' ORDER BY a_created DESC";
-$result = $conn->query($sql);
+$result = pg_query($conn, $sql);
 
 $alerts = [];
-if ($result && $result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
+if ($result && pg_num_rows($result) > 0) {
+    while ($row = pg_fetch_assoc($result)) {
         $alerts[] = $row;
     }
 }
 echo json_encode(['success' => true, 'alerts' => $alerts]);
-$conn->close();
+pg_close($conn);
 ?>

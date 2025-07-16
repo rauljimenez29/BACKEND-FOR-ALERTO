@@ -6,16 +6,17 @@ error_reporting(E_ALL);
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json");
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
-$result = $conn->query("SELECT police_id, f_name AS first_name, l_name AS last_name FROM policeusers");
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
+$result = pg_query($conn, "SELECT police_id, f_name AS first_name, l_name AS last_name FROM policeusers");
 $officers = [];
-while ($row = $result->fetch_assoc()) {
+while ($row = pg_fetch_assoc($result)) {
     $officers[] = $row;
 }
 echo json_encode(['success' => true, 'officers' => $officers]);
-$conn->close();
+pg_close($conn);
 ?>

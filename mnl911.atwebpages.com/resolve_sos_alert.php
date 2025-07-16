@@ -8,15 +8,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-// --- Connect to the database ---
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "error" => "Connection Failed: " . $conn->connect_error]);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "error" => "Connection Failed: " . pg_last_error()]);
     exit();
 }
 
@@ -33,18 +28,21 @@ if (!$alert_id || !$police_id || !$incident_type || !$severity) {
 }
 
 // --- Use a Transaction for data safety ---
-$conn->begin_transaction();
+pg_query($conn, "BEGIN");
 
 try {
     // Step 1: Get latitude and longitude from the original SOS alert
     $lat = null;
     $lng = null;
-    $stmt_coords = $conn->prepare("SELECT a_latitude, a_longitude FROM sosalert WHERE alert_id = ?");
-    $stmt_coords->bind_param("i", $alert_id);
-    $stmt_coords->execute();
-    $stmt_coords->bind_result($lat, $lng);
-    $stmt_coords->fetch();
-    $stmt_coords->close();
+    $stmt_coords = pg_prepare($conn, "get_coords", "SELECT a_latitude, a_longitude FROM sosalert WHERE alert_id = $1");
+    $result_coords = pg_execute($conn, "get_coords", array($alert_id));
+    $row_coords = pg_fetch_array($result_coords, null, PGSQL_ASSOC);
+    if ($row_coords) {
+        $lat = $row_coords['a_latitude'];
+        $lng = $row_coords['a_longitude'];
+    }
+    pg_free_result($result_coords);
+    pg_close_statement($stmt_coords);
 
     if ($lat === null || $lng === null) {
         throw new Exception("Could not find coordinates for the original alert.");
@@ -52,14 +50,14 @@ try {
 
     // Step 2: Get the type_id from the crimetypes table based on the severity string
     $type_id = null;
-    $stmt_type = $conn->prepare("SELECT type_id FROM crimetypes WHERE severity = ?");
-    $stmt_type->bind_param("s", $severity);
-    $stmt_type->execute();
-    $stmt_type->bind_result($fetched_type_id);
-    if ($stmt_type->fetch()) {
-        $type_id = $fetched_type_id;
+    $stmt_type = pg_prepare($conn, "get_type_id", "SELECT type_id FROM crimetypes WHERE severity = $1");
+    $result_type = pg_execute($conn, "get_type_id", array($severity));
+    $row_type = pg_fetch_array($result_type, null, PGSQL_ASSOC);
+    if ($row_type) {
+        $type_id = $row_type['type_id'];
     }
-    $stmt_type->close();
+    pg_free_result($result_type);
+    pg_close_statement($stmt_type);
 
     if ($type_id === null) {
         throw new Exception("Invalid severity level provided. Make sure 'Low', 'Medium', 'High' exist in the crimetypes table.");
@@ -68,33 +66,33 @@ try {
     // Step 3: Insert the crime report details using a default zone_id
     $default_zone_id = 1; // This provides the required zone_id
     // Note: 'longtitude' is a typo in your database schema, so we match it here.
-    $stmt_report = $conn->prepare("INSERT INTO crimereports (alert_id, zone_id, type_id, description, latitude, longtitude, report_time, crime_type) VALUES (?, ?, ?, ?, ?, ?, NOW(), ?)");
-    $stmt_report->bind_param("iiisdds", $alert_id, $default_zone_id, $type_id, $description, $lat, $lng, $incident_type);
-    $stmt_report->execute();
-    $stmt_report->close();
+    $stmt_report = pg_prepare($conn, "insert_report", "INSERT INTO crimereports (alert_id, zone_id, type_id, description, latitude, longtitude, report_time, crime_type) VALUES ($1, $2, $3, $4, $5, $6, NOW(), $7)");
+    $result_report = pg_execute($conn, "insert_report", array($alert_id, $default_zone_id, $type_id, $description, $lat, $lng, $incident_type));
+    pg_free_result($result_report);
+    pg_close_statement($stmt_report);
     
     // Step 4: Update the main alert status in `sosalert`
-    $stmt_alert = $conn->prepare("UPDATE sosalert SET a_status = 'resolved' WHERE alert_id = ?");
-    $stmt_alert->bind_param("i", $alert_id);
-    $stmt_alert->execute();
-    $stmt_alert->close();
+    $stmt_alert = pg_prepare($conn, "update_alert", "UPDATE sosalert SET a_status = 'resolved' WHERE alert_id = $1");
+    $result_alert = pg_execute($conn, "update_alert", array($alert_id));
+    pg_free_result($result_alert);
+    pg_close_statement($stmt_alert);
 
     // Step 5: Create the police history record
-    $stmt_history = $conn->prepare("INSERT INTO policehistory (alert_id, police_id, response_time, p_audio) VALUES (?, ?, NOW(), ?)");
+    $stmt_history = pg_prepare($conn, "insert_history", "INSERT INTO policehistory (alert_id, police_id, response_time, p_audio) VALUES ($1, $2, NOW(), $3)");
     $empty_audio = ""; // Assuming no audio for now
-    $stmt_history->bind_param("iis", $alert_id, $police_id, $empty_audio);
-    $stmt_history->execute();
-    $stmt_history->close();
+    $result_history = pg_execute($conn, "insert_history", array($alert_id, $police_id, $empty_audio));
+    pg_free_result($result_history);
+    pg_close_statement($stmt_history);
 
     // If all queries were successful, commit the changes
-    $conn->commit();
+    pg_query($conn, "COMMIT");
     echo json_encode(["success" => true, "message" => "Incident resolved and report filed successfully."]);
 
 } catch (Exception $exception) {
     // If any query fails, roll back all changes
-    $conn->rollback();
+    pg_query($conn, "ROLLBACK");
     echo json_encode(["success" => false, "error" => "Database error: " . $exception->getMessage()]);
 }
 
-$conn->close();
+pg_close($conn);
 ?>

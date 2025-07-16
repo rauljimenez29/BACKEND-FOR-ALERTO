@@ -23,10 +23,11 @@ register_shutdown_function(function() {
 
 try {
     // --- DB credentials ---
-    $host = "fdb1028.awardspace.net";
-    $user = "4642576_crimemap";
-    $password = "@CrimeMap_911";
-    $dbname = "4642576_crimemap";
+    $dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+    $conn = pg_connect($dsn);
+    if (!$conn) {
+        throw new Exception("Database connection failed: " . pg_last_error());
+    }
 
     // --- Require GET ---
     if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
@@ -41,20 +42,16 @@ try {
     $alert_id = intval($_GET['alert_id']);
 
     // --- Connect DB ---
-    $conn = new mysqli($host, $user, $password, $dbname);
-    if ($conn->connect_error) {
-        throw new Exception("Database connection failed: " . $conn->connect_error);
-    }
-   
+    // The original MySQL connection logic is removed as per the edit hint.
+    // The new code snippet provided a placeholder for $dsn and $conn.
+    // Assuming $dsn and $conn are now defined and $conn is a valid PostgreSQL connection.
 
     // --- Query a_status ---
-    $sql = "SELECT a_status FROM sosalert WHERE alert_id = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $alert_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $sql = "SELECT a_status FROM sosalert WHERE alert_id = $1";
+    $params = [$alert_id];
+    $result = pg_query_params($conn, $sql, $params);
 
-    if ($result && $row = $result->fetch_assoc()) {
+    if ($result && $row = pg_fetch_assoc($result)) {
         echo json_encode([
             "success" => true,
             "status" => $row['a_status']
@@ -66,8 +63,8 @@ try {
         ]);
     }
 
-    $stmt->close();
-    $conn->close();
+    pg_free_result($result); // Free the result set
+    pg_close($conn); // Close the connection
 
 } catch (Exception $e) {
     http_response_code(400);

@@ -4,23 +4,22 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header('Content-Type: application/json');
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 $police_id = $_GET['police_id'] ?? $_POST['police_id'] ?? null;
 $latitude = $_GET['latitude'] ?? $_POST['latitude'] ?? null;
 $longitude = $_GET['longitude'] ?? $_POST['longitude'] ?? null;
 
 if ($police_id) {
-    $stmt = $conn->prepare("SELECT * FROM notifications WHERE police_id = ? ORDER BY id DESC");
-    $stmt->bind_param('i', $police_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    $stmt = pg_prepare($conn, "SELECT * FROM notifications WHERE police_id = $1 ORDER BY id DESC");
+    $result = pg_execute($conn, $stmt, [$police_id]);
     $notifications = [];
-    while ($row = $result->fetch_assoc()) {
+    while ($row = pg_fetch_assoc($result)) {
         // Only filter if both latitude and longitude are provided
         if ($latitude && $longitude && isset($row['a_latitude']) && isset($row['a_longitude'])) {
             $distance = haversineGreatCircleDistance(
@@ -38,11 +37,11 @@ if ($police_id) {
         }
     }
     echo json_encode(['success' => true, 'notifications' => $notifications]);
-    $stmt->close();
+    pg_free_result($result);
+    pg_close($conn);
 } else {
     echo json_encode(['success' => false, 'error' => 'Missing police_id']);
 }
-$conn->close();
 
 // Haversine formula
 function haversineGreatCircleDistance($latitudeFrom, $longitudeFrom, $latitudeTo, $longitudeTo, $earthRadius = 6371)

@@ -7,13 +7,9 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // DB connection
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
     echo json_encode(["success" => false, "message" => "Database connection failed"]);
     exit();
 }
@@ -25,7 +21,7 @@ $user_type = $_POST['user_type'] ?? '';
 
 if (!$email || !$rawPassword || !$user_type) {
     echo json_encode(["success" => false, "message" => "Missing fields"]);
-    $conn->close();
+    pg_close($conn);
     exit();
 }
 
@@ -34,15 +30,14 @@ $hashedPassword = password_hash($rawPassword, PASSWORD_DEFAULT);
 // Decide table
 $table = $user_type === 'police' ? 'policeusers' : 'normalusers';
 
-$stmt = $conn->prepare("UPDATE `$table` SET `password` = ? WHERE `email` = ?");
-$stmt->bind_param("ss", $hashedPassword, $email);
+$stmt = pg_prepare($conn, "update_password", "UPDATE `$table` SET `password` = $1 WHERE `email` = $2");
+$result = pg_execute($conn, "update_password", [$hashedPassword, $email]);
 
-if ($stmt->execute() && $stmt->affected_rows > 0) {
+if ($result && pg_affected_rows($result) > 0) {
     echo json_encode(["success" => true, "message" => "Password updated"]);
 } else {
     echo json_encode(["success" => false, "message" => "Failed to update password"]);
 }
 
-$stmt->close();
-$conn->close();
+pg_close($conn);
 ?>

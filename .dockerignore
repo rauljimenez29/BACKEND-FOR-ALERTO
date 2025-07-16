@@ -1,0 +1,13 @@
+# Ignore git and Docker files
+.git
+.gitignore
+Dockerfile
+.dockerignore
+README.md
+
+# Ignore logs and debug files
+*.log
+
+# Ignore uploads if you don't want to include them in the image (uncomment if needed)
+#mnl911.atwebpages.com/uploads/
+#mnl911.atwebpages.com/profile_photos/ 

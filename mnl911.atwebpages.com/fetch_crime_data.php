@@ -9,14 +9,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Database connection
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    die(json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]));
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    die(json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]));
 }
 
 $sql = "
@@ -37,18 +33,18 @@ $sql = "
     ORDER BY sa.alert_id DESC
 ";
 
-$result = $conn->query($sql);
+$result = pg_query($conn, $sql);
 if (!$result) {
     // ✅ Debug full query + error
     die(json_encode([
         "success" => false,
-        "message" => "SQL query failed: " . $conn->error,
+        "message" => "SQL query failed: " . pg_last_error(),
         "query" => $sql
     ]));
 }
 
 $records = [];
-while ($row = $result->fetch_assoc()) {
+while ($row = pg_fetch_assoc($result)) {
     $records[] = $row;
 }
 
@@ -58,5 +54,5 @@ if (empty($records)) {
 
 echo json_encode(["success" => true, "records" => $records]);
 
-$conn->close();
+pg_close($conn);
 ?>

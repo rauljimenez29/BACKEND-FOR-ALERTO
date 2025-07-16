@@ -4,35 +4,35 @@ header("Access-Control-Allow-Headers: *");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header('Content-Type: application/json');
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-$conn = new mysqli($host, $user, $password, $dbname);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 if (isset($_GET['nuser_id'])) {
     $nuser_id = $_GET['nuser_id'];
-    $stmt = $conn->prepare("SELECT f_name, l_name, email, m_number, photo_url, profile_failed_attempts, profile_lockout_until FROM normalusers WHERE nuser_id = ?");
-    $stmt->bind_param("i", $nuser_id);
-    $stmt->execute();
-    $stmt->bind_result($f_name, $l_name, $email, $m_number, $photo_url, $profile_failed_attempts, $profile_lockout_until);
-    if ($stmt->fetch()) {
+    $stmt = pg_prepare($conn, "SELECT_USER", "SELECT f_name, l_name, email, m_number, photo_url, profile_failed_attempts, profile_lockout_until FROM normalusers WHERE nuser_id = $1");
+    $result = pg_execute($conn, "SELECT_USER", array($nuser_id));
+    $row = pg_fetch_assoc($result);
+    if ($row) {
         echo json_encode([
             "success" => true,
-            "firstName" => $f_name,
-            "lastName" => $l_name,
-            "email" => $email,
-            "phone" => $m_number,
-            "photo_url" => $photo_url,
-            "profile_failed_attempts" => $profile_failed_attempts,
-            "profile_lockout_until" => $profile_lockout_until
+            "firstName" => $row['f_name'],
+            "lastName" => $row['l_name'],
+            "email" => $row['email'],
+            "phone" => $row['m_number'],
+            "photo_url" => $row['photo_url'],
+            "profile_failed_attempts" => $row['profile_failed_attempts'],
+            "profile_lockout_until" => $row['profile_lockout_until']
         ]);
     } else {
         echo json_encode(["success" => false, "message" => "User not found"]);
     }
-    $stmt->close();
+    pg_free_result($result);
+    pg_close($conn);
 } else {
     echo json_encode(["success" => false, "message" => "nuser_id required"]);
 }
-$conn->close();
 ?>

@@ -8,10 +8,12 @@ ini_set('display_errors', 1);
 header("Content-Type: application/json");
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -47,25 +49,29 @@ $upload_path = $upload_dir . $new_filename;
 if (move_uploaded_file($audio_file['tmp_name'], $upload_path)) {
 
     // --- Connect to the database ---
-    $conn = new mysqli($host, $user, $password, $dbname);
-    if ($conn->connect_error) {
-        echo json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]);
+    $dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+    $conn = pg_connect($dsn);
+    if (!$conn) {
+        echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
         exit();
     }
 
     // --- Update the sosalert record with the audio file path ---
-    $sql_update = "UPDATE sosalert SET a_audio = ? WHERE alert_id = ?";
-    $stmt_update = $conn->prepare($sql_update);
-    $stmt_update->bind_param("si", $upload_path, $alert_id);
-
-    if ($stmt_update->execute()) {
+    $sql_update = "UPDATE sosalert SET a_audio = $1 WHERE alert_id = $2";
+    $params = array($upload_path, $alert_id);
+    $result = pg_prepare($conn, "update_sosalert", $sql_update);
+    if (!$result) {
+        echo json_encode(["success" => false, "message" => "Failed to prepare update statement: " . pg_last_error()]);
+        exit();
+    }
+    $result = pg_execute($conn, "update_sosalert", $params);
+    if ($result) {
         echo json_encode(["success" => true, "message" => "Audio uploaded and linked successfully."]);
     } else {
-        echo json_encode(["success" => false, "message" => "Database update failed: " . $stmt_update->error]);
+        echo json_encode(["success" => false, "message" => "Database update failed: " . pg_last_error()]);
     }
 
-    $stmt_update->close();
-    $conn->close();
+    pg_close($conn);
 
 } else {
     echo json_encode(["success" => false, "message" => "Failed to save uploaded file."]);

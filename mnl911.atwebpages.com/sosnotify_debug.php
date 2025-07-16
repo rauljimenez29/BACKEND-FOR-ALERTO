@@ -19,10 +19,11 @@ register_shutdown_function(function() {
 
 try {
     // --- Database Credentials ---
-    $host = "fdb1028.awardspace.net";
-    $user = "4642576_crimemap";
-    $password = "@CrimeMap_911";
-    $dbname = "4642576_crimemap";
+    $dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+    $conn = pg_connect($dsn);
+    if (!$conn) {
+        throw new Exception("Database connection failed: " . pg_last_error());
+    }
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception("POST request required");
@@ -49,40 +50,34 @@ $longitude = isset($_POST['a_longitude']) ? floatval($_POST['a_longitude']) : nu
         throw new Exception("Missing required fields.");
     }
 
-    $conn = new mysqli($host, $user, $password, $dbname);
-    if ($conn->connect_error) {
-        throw new Exception("Database connection failed: " . $conn->connect_error);
-    }
-
     // --- MODIFIED: The INSERT statement now includes the new a_address column --
-    $sql_insert = "INSERT INTO sosalert (nuser_id, a_created, a_latitude, a_longitude, a_address, a_status) VALUES (?, NOW(), ?, ?, ?, 'pending')";
-    $stmt_insert = $conn->prepare($sql_insert);
-    $stmt_insert->bind_param("idds", $nuser_id, $latitude, $longitude, $location_address);
+    $sql_insert = "INSERT INTO sosalert (nuser_id, a_created, a_latitude, a_longitude, a_address, a_status) VALUES ($1, NOW(), $2, $3, $4, 'pending')";
+    $params_insert = [$nuser_id, $latitude, $longitude, $location_address];
+    $result_insert = pg_query_params($conn, $sql_insert, $params_insert);
 
-    if (!$stmt_insert->execute() || $stmt_insert->affected_rows === 0) {
-        throw new Exception("Database INSERT failed. Check if nuser_id exists.");
+    if (!$result_insert) {
+        throw new Exception("Database INSERT failed: " . pg_last_error($conn));
     }
-    $alert_id = $conn->insert_id;
-    $stmt_insert->close();
+    $alert_id = pg_last_oid($result_insert);
 
     // --- The rest of the script for fetching names and sending notifications remains the same ---
     // Fetch user's name
     $user_name = "User " . $nuser_id;
-    $sql_user = "SELECT f_name FROM normalusers WHERE nuser_id = ?";
-    $stmt_user = $conn->prepare($sql_user);
-    $stmt_user->bind_param("i", $nuser_id);
-    if ($stmt_user->execute()) {
-        $result_user = $stmt_user->get_result();
-        if ($row_user = $result_user->fetch_assoc()) {
-            $user_name = $row_user['f_name'];
-        }
+    $sql_user = "SELECT f_name FROM normalusers WHERE nuser_id = $1";
+    $params_user = [$nuser_id];
+    $result_user = pg_query_params($conn, $sql_user, $params_user);
+    if ($row_user = pg_fetch_assoc($result_user)) {
+        $user_name = $row_user['f_name'];
     }
-    $stmt_user->close();
+    pg_free_result($result_user);
+
     // Get police tokens
     $sql_tokens = "SELECT expoPushToken FROM policeusers WHERE expoPushToken IS NOT NULL AND expoPushToken != ''";
-    $result_tokens = $conn->query($sql_tokens);
+    $result_tokens = pg_query($conn, $sql_tokens);
     $tokens = [];
-    while($row = $result_tokens->fetch_assoc()) { $tokens[] = $row["expoPushToken"]; }
+    while($row = pg_fetch_assoc($result_tokens)) { $tokens[] = $row["expoPushToken"]; }
+    pg_free_result($result_tokens);
+
     // Send notifications
     if (!empty($tokens)) {
         $message = [
@@ -105,7 +100,7 @@ $longitude = isset($_POST['a_longitude']) ? floatval($_POST['a_longitude']) : nu
         curl_close($ch);
     }
     echo json_encode(["success" => true, "alert_id" => $alert_id, "message" => "SOS alert created and notifications sent."]);
-    $conn->close();
+    pg_close($conn);
 
 } catch (Exception $e) {
     http_response_code(400);

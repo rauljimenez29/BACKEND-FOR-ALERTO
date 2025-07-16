@@ -11,10 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit();
 }
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 $required = ['f_name', 'l_name', 'm_number', 'email', 'password', 'badge_number', 'station_name', 'security_question', 'security_answer'];
 foreach ($required as $field) {
@@ -51,31 +53,25 @@ if ($station_name === "Default") {
 $hashed_password = password_hash($password_input, PASSWORD_DEFAULT);
 $hashed_security_answer = password_hash($security_answer_input, PASSWORD_DEFAULT);
 
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]);
-    exit();
-}
-
-$check = $conn->prepare("SELECT police_id FROM policeusers WHERE email = ?");
-$check->bind_param("s", $email);
-$check->execute();
-$check->store_result();
-if ($check->num_rows > 0) {
+$check_query = "SELECT police_id FROM policeusers WHERE email = $1";
+$check_params = [$email];
+$check_result = pg_query_params($conn, $check_query, $check_params);
+if ($check_result && pg_num_rows($check_result) > 0) {
     echo json_encode(["success" => false, "message" => "Email already registered"]);
-    $check->close();
-    $conn->close();
+    pg_free_result($check_result);
+    pg_close($conn);
     exit();
 }
-$check->close();
+pg_free_result($check_result);
 
-$sql = "INSERT INTO policeusers (f_name, l_name, m_number, email, password, badge_number, station_name, security_question, security_answer, account_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-$stmt = $conn->prepare($sql);
+$sql = "INSERT INTO policeusers (f_name, l_name, m_number, email, password, badge_number, station_name, security_question, security_answer, account_status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)";
+$stmt = pg_prepare($conn, "signup_stmt", $sql);
 $default_status = 'P.Verification';
-$stmt->bind_param("ssssssssss", $f_name, $l_name, $m_number, $email, $hashed_password, $badge_number, $station_name, $security_question, $hashed_security_answer, $default_status);
+$params = [$f_name, $l_name, $m_number, $email, $hashed_password, $badge_number, $station_name, $security_question, $hashed_security_answer, $default_status];
+$result = pg_execute($conn, "signup_stmt", $params);
 
-if ($stmt->execute()) {
-    $police_id = $stmt->insert_id;
+if ($result) {
+    $police_id = pg_fetch_result($result, 0, "police_id");
     echo json_encode([
         "success" => true,
         "police_id" => $police_id,
@@ -86,6 +82,6 @@ if ($stmt->execute()) {
     echo json_encode(["success" => false, "message" => "Signup failed"]);
 }
 
-$stmt->close();
-$conn->close();
+pg_free_result($result);
+pg_close($conn);
 ?>

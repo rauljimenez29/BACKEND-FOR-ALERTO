@@ -7,10 +7,12 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 // --- Main Response Object ---
 $response = [
@@ -31,14 +33,6 @@ if (!$police_id) {
     exit();
 }
 
-// --- Connect to the database ---
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    $response['error'] = "Connection Failed: " . $conn->connect_error;
-    echo json_encode($response);
-    exit();
-}
-
 try {
     // --- Query 1: Fetch unassigned SOS alerts ---
     // This query now joins with normalusers to get the victim's name
@@ -51,21 +45,17 @@ try {
                    JOIN normalusers nu ON sa.nuser_id = nu.nuser_id
                    WHERE sa.a_status = 'pending' 
                    ORDER BY sa.a_created DESC";
-    $result_alerts = $conn->query($sql_alerts);
-    while($row = $result_alerts->fetch_assoc()) {
+    $result_alerts = pg_query($conn, $sql_alerts);
+    while($row = pg_fetch_assoc($result_alerts)) {
         $response['data']['new_alerts'][] = $row;
     }
 
     // --- Query 2: Fetch unread notifications for the specific officer ---
-    $sql_notifications = "SELECT id, title, description, created_at FROM notifications WHERE police_id = ? AND is_read = 0 ORDER BY created_at DESC";
-    $stmt_notifications = $conn->prepare($sql_notifications);
-    $stmt_notifications->bind_param("i", $police_id);
-    $stmt_notifications->execute();
-    $result_notifications = $stmt_notifications->get_result();
-    while($row = $result_notifications->fetch_assoc()) {
+    $sql_notifications = "SELECT id, title, description, created_at FROM notifications WHERE police_id = $1 AND is_read = 0 ORDER BY created_at DESC";
+    $result_notifications = pg_query_params($conn, $sql_notifications, [$police_id]);
+    while($row = pg_fetch_assoc($result_notifications)) {
         $response['data']['notifications'][] = $row;
     }
-    $stmt_notifications->close();
     
     $response['success'] = true;
 
@@ -74,7 +64,7 @@ try {
 }
 
 // --- Close connection and send response ---
-$conn->close();
+pg_close($conn);
 echo json_encode($response);
 
 ?>

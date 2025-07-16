@@ -11,23 +11,18 @@ ini_set('display_errors', 1);
 
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 $response = ['success' => false];
 
 if (isset($_GET['police_id'])) {
     $police_id = $_GET['police_id'];
 
-    $conn = new mysqli($host, $user, $password, $dbname);
-    if ($conn->connect_error) {
-        $response['error'] = "Connection Failed: " . $conn->connect_error;
-        echo json_encode($response);
-        exit();
-    }
-    
     // Set timezone for this specific database connection
    
 
@@ -43,25 +38,24 @@ if (isset($_GET['police_id'])) {
             FROM policehistory ph
             JOIN sosalert sa ON ph.alert_id = sa.alert_id
             JOIN normalusers nu ON sa.nuser_id = nu.nuser_id
-            WHERE ph.police_id = ?
+            WHERE ph.police_id = $1
             ORDER BY ph.response_time DESC";
 
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $police_id);
+    $stmt = pg_prepare($conn, "get_police_history", $sql);
+    $result = pg_execute($conn, "get_police_history", array($police_id));
     
-    if ($stmt->execute()) {
-        $result = $stmt->get_result();
+    if ($result) {
         $history = [];
-        while($row = $result->fetch_assoc()) {
+        while($row = pg_fetch_assoc($result)) {
             $history[] = $row;
         }
         $response['success'] = true;
         $response['history'] = $history;
     } else {
-        $response['error'] = "Query execution failed: " . $stmt->error;
+        $response['error'] = "Query execution failed: " . pg_last_error();
     }
-    $stmt->close();
-    $conn->close();
+    pg_free_result($result);
+    pg_close($conn);
 } else {
     $response['error'] = "Required parameter 'police_id' is missing.";
 }

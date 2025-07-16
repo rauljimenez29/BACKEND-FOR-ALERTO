@@ -8,10 +8,13 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // --- Database Credentials ---
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
+$dsn = 'postgresql://postgres:[
+// ]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
+    exit();
+}
 
 // Only allow POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -29,24 +32,25 @@ if (!$police_id || !$token) {
 }
 
 // --- Connect to the database ---
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
-    echo json_encode(["success" => false, "message" => "Connection Failed: " . $conn->connect_error]);
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
+    echo json_encode(["success" => false, "message" => "Connection failed: " . pg_last_error()]);
     exit();
 }
 
 // --- Prepare and execute the UPDATE query ---
 // This updates the police user's row with their Expo push token
 $sql = "UPDATE policeusers SET expoPushToken = ? WHERE police_id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("si", $token, $police_id); // "s" for string token, "i" for integer police_id
+$stmt = pg_prepare($conn, "update_token", $sql);
+$params = [$token, $police_id];
+$result = pg_execute($conn, "update_token", $params);
 
-if ($stmt->execute()) {
+if ($result) {
     echo json_encode(["success" => true, "message" => "Token stored successfully."]);
 } else {
-    echo json_encode(["success" => false, "message" => "Database update failed: " . $stmt->error]);
+    echo json_encode(["success" => false, "message" => "Database update failed: " . pg_last_error()]);
 }
 
-$stmt->close();
-$conn->close();
+pg_close($conn);
 ?>

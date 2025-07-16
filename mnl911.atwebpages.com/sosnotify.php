@@ -25,10 +25,11 @@ register_shutdown_function(function() {
 
 try {
     // --- Database Credentials ---
-    $host = "fdb1028.awardspace.net";
-    $user = "4642576_crimemap";
-    $password = "@CrimeMap_911";
-    $dbname = "4642576_crimemap";
+    $dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+    $conn = pg_connect($dsn);
+    if (!$conn) {
+        throw new Exception("Database connection failed: " . pg_last_error());
+    }
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
         throw new Exception("POST request required");
@@ -44,56 +45,51 @@ try {
         throw new Exception("Missing required fields.");
     }
 
-    $conn = new mysqli($host, $user, $password, $dbname);
-    if ($conn->connect_error) {
-        throw new Exception("Database connection failed: " . $conn->connect_error);
-    }
-
     // --- OPTIMIZED: Single query to get user name and insert alert ---
-    $sql_insert = "INSERT INTO sosalert (nuser_id, a_created, a_latitude, a_longitude, a_address, a_status) VALUES (?, NOW(), ?, ?, ?, 'pending')";
-    $stmt_insert = $conn->prepare($sql_insert);
+    $sql_insert = "INSERT INTO sosalert (nuser_id, a_created, a_latitude, a_longitude, a_address, a_status) VALUES ($1, NOW(), $2, $3, $4, 'pending')";
+    $params_insert = [$nuser_id, $latitude, $longitude, $a_address];
+    $result_insert = pg_query_params($conn, $sql_insert, $params_insert);
     
-    $stmt_insert->bind_param("idds", $nuser_id, $latitude, $longitude, $a_address);
-
-    if (!$stmt_insert->execute() || $stmt_insert->affected_rows === 0) {
-        throw new Exception("Database INSERT failed. Check if nuser_id exists.");
+    if (!$result_insert) {
+        throw new Exception("Database INSERT failed: " . pg_last_error($conn));
     }
-    $alert_id = $conn->insert_id;
-    $stmt_insert->close();
+    $alert_id = pg_last_oid($result_insert);
+    pg_free_result($result_insert);
 
     // --- OPTIMIZED: Get user name and police tokens in parallel ---
     $user_name = "User " . $nuser_id;
     
     // Get user name with optimized query
-    $sql_user = "SELECT f_name FROM normalusers WHERE nuser_id = ? LIMIT 1";
-    $stmt_user = $conn->prepare($sql_user);
-    $stmt_user->bind_param("i", $nuser_id);
-    if ($stmt_user->execute()) {
-        $result_user = $stmt_user->get_result();
-        if ($row_user = $result_user->fetch_assoc()) {
+    $sql_user = "SELECT f_name FROM normalusers WHERE nuser_id = $1 LIMIT 1";
+    $params_user = [$nuser_id];
+    $result_user = pg_query_params($conn, $sql_user, $params_user);
+    if ($result_user) {
+        $row_user = pg_fetch_assoc($result_user);
+        if ($row_user) {
             $user_name = $row_user['f_name'];
         }
+        pg_free_result($result_user);
     }
-    $stmt_user->close();
     
     // --- OPTIMIZED: Get police tokens with better query ---
     // First, let's check what police users exist
     $sql_check = "SELECT COUNT(*) as total_police FROM policeusers";
-    $result_check = $conn->query($sql_check);
+    $result_check = pg_query($conn, $sql_check);
     $total_police = 0;
     if ($result_check) {
-        $row = $result_check->fetch_assoc();
+        $row = pg_fetch_assoc($result_check);
         $total_police = $row['total_police'];
+        pg_free_result($result_check);
     }
     
     // Get police tokens - try different possible column names
     $sql_tokens = "SELECT expoPushToken, police_id FROM policeusers WHERE is_on_shift = 1 AND account_status = 'P.Active' AND (expoPushToken IS NOT NULL AND expoPushToken != '' AND expoPushToken != 'null')";
-    $result_tokens = $conn->query($sql_tokens);
+    $result_tokens = pg_query($conn, $sql_tokens);
     $tokens = [];
     $debug_info = [];
     
     if ($result_tokens) {
-        while($row = $result_tokens->fetch_assoc()) { 
+        while($row = pg_fetch_assoc($result_tokens)) { 
             // Try different possible token columns
             $token = $row["expoPushToken"] ?? null;
             if ($token) {
@@ -104,6 +100,7 @@ try {
                 ];
             }
         }
+        pg_free_result($result_tokens);
     }
     
     // Log debugging information
@@ -167,7 +164,7 @@ try {
         ]
     ]);
     
-    $conn->close();
+    pg_close($conn);
 
 } catch (Exception $e) {
     http_response_code(400);

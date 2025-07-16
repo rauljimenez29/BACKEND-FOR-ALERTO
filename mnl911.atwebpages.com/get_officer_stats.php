@@ -6,40 +6,29 @@ error_reporting(E_ALL);
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
 
-$host = "fdb1028.awardspace.net";
-$user = "4642576_crimemap";
-$password = "@CrimeMap_911";
-$dbname = "4642576_crimemap";
-
-if (!isset($_GET['police_id'])) {
-    echo json_encode(['success' => false, 'error' => 'Missing police_id']);
-    exit;
-}
-
-$police_id = intval($_GET['police_id']);
-
-$conn = new mysqli($host, $user, $password, $dbname);
-if ($conn->connect_error) {
+$dsn = 'postgresql://postgres:[09123433140aa]@db.uyqspojnegjmxnedbtph.supabase.co:5432/postgres';
+$conn = pg_connect($dsn);
+if (!$conn) {
     echo json_encode(['success' => false, 'error' => 'Database connection failed']);
     exit;
 }
 
 // Count emergencies responded (assignments with non-null resolved_at)
-$sql1 = "SELECT COUNT(*) as emergency_responded FROM sosofficerassignments WHERE police_id = ? AND resolved_at IS NOT NULL";
-$stmt1 = $conn->prepare($sql1);
-$stmt1->bind_param("i", $police_id);
-$stmt1->execute();
-$res1 = $stmt1->get_result();
-$row1 = $res1->fetch_assoc();
+$sql1 = "SELECT COUNT(*) as emergency_responded FROM sosofficerassignments WHERE police_id = $1 AND resolved_at IS NOT NULL";
+$stmt1 = pg_prepare($conn, "count_emergencies", $sql1);
+$params1 = array($police_id);
+pg_execute($conn, "count_emergencies", $params1);
+$res1 = pg_get_result($conn);
+$row1 = pg_fetch_assoc($res1);
 $emergency_responded = $row1['emergency_responded'] ?? 0;
 
 // Calculate average response time in minutes
-$sql2 = "SELECT AVG(TIMESTAMPDIFF(MINUTE, assigned_at, resolved_at)) as avg_time_response FROM sosofficerassignments WHERE police_id = ? AND resolved_at IS NOT NULL";
-$stmt2 = $conn->prepare($sql2);
-$stmt2->bind_param("i", $police_id);
-$stmt2->execute();
-$res2 = $stmt2->get_result();
-$row2 = $res2->fetch_assoc();
+$sql2 = "SELECT AVG(TIMESTAMPDIFF(MINUTE, assigned_at, resolved_at)) as avg_time_response FROM sosofficerassignments WHERE police_id = $1 AND resolved_at IS NOT NULL";
+$stmt2 = pg_prepare($conn, "avg_response_time", $sql2);
+$params2 = array($police_id);
+pg_execute($conn, "avg_response_time", $params2);
+$res2 = pg_get_result($conn);
+$row2 = pg_fetch_assoc($res2);
 $avg_time_response = $row2['avg_time_response'] !== null ? round($row2['avg_time_response'], 2) : 0;
 
 echo json_encode([
@@ -48,7 +37,7 @@ echo json_encode([
     'avg_time_response' => $avg_time_response
 ]);
 
-$stmt1->close();
-$stmt2->close();
-$conn->close();
+pg_free_result($res1);
+pg_free_result($res2);
+pg_close($conn);
 ?>
